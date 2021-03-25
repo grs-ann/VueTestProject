@@ -7,20 +7,42 @@
           <div class="user-profile__follower-count">
               <strong>Followers: </strong> {{ followers }}
           </div>
+          <form class="user-profile__create-twoot" @submit.prevent="createNewTwoot">
+              <label for="newTwoot"><strong>New Twoot</strong></label>
+              <textarea id="newTwoot" rows="4" v-model="newTwootContent"/>
+              <div class="user-profile__create-twoot-type">
+                  <label for="newTwootType"><strong>Type: </strong></label>
+                  <select id="newTwootType" v-model="selectedTwootType">
+                      <option :value="option.value" v-for="(option, index) in twootTypes" :key="index">
+                          {{ option.name }}
+                      </option>
+                  </select>
+              </div>
+              <button>
+                  Twoot
+              </button>
+          </form>
       </div>
       <div class="user-profile__twoots-wrapper">
-              <div class="user-profile__twoot" v-for="twoot in user.twoots" :key="twoot.id" >
-                  {{ twoot.content }}
-              </div>
+          <TwootItem v-for="twoot in user.twoots" :key="twoot.id" :username="user.username" :twoot="twoot" @favourite="toggleFavourite" />
       </div>
   </div>
 </template>
 
 <script>
+import TwootItem from "./TwootItem";
+
 export default {
     name: "UserProfile",
+    components: { TwootItem },
     data() {
         return {
+            newTwootContent: '',
+            selectedTwootType: 'instant',
+            twootTypes: [
+                { value: 'draft', name: 'Draft' },
+                { value: 'instant', name: 'Instant Twoot' }
+            ],
             followers: 0,
             user: {
                 id: 1,
@@ -47,6 +69,18 @@ export default {
     methods: {
         followUser() {
             this.followers++;
+        },
+        toggleFavourite(id) {
+            console.log(`Favourited Tweet #${id}`);
+        },
+        createNewTwoot() {
+            if (this.newTwootContent && this.selectedTwootType !== 'draft') {
+                this.user.twoots.unshift({
+                    id: this.user.twoots.length + 1,
+                    content: this.newTwootContent
+                });
+                this.newTwootContent = "";
+            }
         }
     },
     computed: {
@@ -84,6 +118,13 @@ export default {
     margin-right: auto;
     padding: 0 10px;
     font-weight: bold;
+}
+
+.user-profile__create-twoot {
+    border-top: 1px solid black;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 h1 {
